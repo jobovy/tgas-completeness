@@ -1,6 +1,7 @@
 # Some utilities for the effective selection and stellar densities
 import numpy
 from scipy import interpolate
+from isodist import PadovaIsochrone
 def load_spectral_types(filename='EEM_dwarf_UBVIJHK_colors_Teff.txt'):
     names= ['SpT','Teff','logT','BCv','Mv','logL','B-V','Bt-Vt','U-B',
             'V-Rc','V-Ic','V-Ks','J-H','H-K','Ks-W1','Msun','logAge',
@@ -46,7 +47,6 @@ def main_sequence_cut_r(jk,low=False,tight=False):
         dj[dj > 1.5]= 1.5
         dj*= -1.
     else:
-        tjk= jk
         djk= -(jk-0.6)/5.
         djk[djk>0.]= 0.
         j_locus= ip_eems(jk+djk)
@@ -55,3 +55,27 @@ def main_sequence_cut_r(jk,low=False,tight=False):
         dj[dj > 2.5]= 2.5
         dj*= -1.
     return j_locus+dj
+
+# Giant sequence from isochrone
+iso= PadovaIsochrone(type='2mass-spitzer-wise',Z=0.017,parsec=True)
+p= iso(logage=9.8,Z=0.017)
+p_indx= (p['M_ini'] > 1.14)*(p['M_ini'] < 1.1845)\
+    *(numpy.roll(p['J']-p['Ks'],-1) > p['J']-p['Ks'])
+ip_giant= interpolate.UnivariateSpline((p['J']-p['Ks'])[p_indx],
+                                        p['J'][p_indx],k=3,s=.01)
+def giant_sequence_cut(jk,low=False,tight=False):
+    out= numpy.empty_like(jk)
+    if low and tight:
+        jk_indx= jk < 0.45
+        out[jk_indx]= main_sequence_cut_r(jk[jk_indx],low=False,tight=False)
+        out[True-jk_indx]= ip_giant(jk[True-jk_indx]-0.05)+0.1
+    elif low:
+        jk_indx= jk < 0.45
+        out[jk_indx]= main_sequence_cut_r(jk[jk_indx],low=False,tight=False)
+        out[True-jk_indx]= ip_giant(jk[True-jk_indx]-0.1)+0.35
+    elif tight:
+        out= ip_giant(jk+0.1+0.05*numpy.exp(-(jk-0.58)**2./0.01))
+    else:
+        out= ip_giant(jk+0.25)
+    return out
+    
