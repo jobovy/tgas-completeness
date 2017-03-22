@@ -1,8 +1,11 @@
 # Some utilities for the effective selection and stellar densities
+import os, os.path
 import numpy
 from scipy import interpolate
 from isodist import PadovaIsochrone
-def load_spectral_types(filename='EEM_dwarf_UBVIJHK_colors_Teff.txt'):
+def load_spectral_types(filename=os.path.join(\
+        os.path.dirname(os.path.realpath(__file__)),
+        'EEM_dwarf_UBVIJHK_colors_Teff.txt')):
     names= ['SpT','Teff','logT','BCv','Mv','logL','B-V','Bt-Vt','U-B',
             'V-Rc','V-Ic','V-Ks','J-H','H-K','Ks-W1','Msun','logAge',
             'b-y','SpT_repeat','M_J','M_Ks','Mbol','i-z','z-Y','W1-W2']
