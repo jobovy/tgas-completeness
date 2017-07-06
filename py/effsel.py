@@ -10,9 +10,9 @@ def load_spectral_types(filename=os.path.join(\
             'V-Rc','V-Ic','V-Ks','J-H','H-K','Ks-W1','Msun','logAge',
             'b-y','SpT_repeat','M_J','M_Ks','Mbol','i-z','z-Y','W1-W2']
     # Construct dtype
-    dtype= ['S5']
+    dtype= ['U5']
     dtype.extend([numpy.float64 for ii in range(17)])
-    dtype.append('S5')
+    dtype.append('U5')
     dtype.extend([numpy.float64 for ii in range(6)])
     final_dtype= []
     for name,dt in zip(names,dtype):
@@ -24,8 +24,8 @@ def load_spectral_types(filename=os.path.join(\
     return data
 
 sp= load_spectral_types()
-sp_indx= numpy.array([(not 'O' in s)*(not 'L' in s)*(not 'T' in s)\
-                          *(not 'Y' in s)\
+sp_indx= numpy.array([(not 'O' in s)*(not 'L' in s)\
+                          *(not 'T' in s)*(not 'Y' in s)\
                           *(not '.5V' in s)*(s != 'A8V') for s in sp['SpT']],
                      dtype='bool') #A8V has the same MJ as A9V
 # Cut out the small part where the color decreases
